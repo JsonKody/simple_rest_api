@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsc --outDir dist main.ts && node dist/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsc --outDir dist main.ts && cp index.html dist/ && node dist/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "psh": "git add -A && git commit -m \"saved by script\" && git push"
   },
   "author": "jk",
   "license": "MIT",
