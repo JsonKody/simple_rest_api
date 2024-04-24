@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Uživatelská správa</title>
+  </head>
+  <body>
+    <h1>Uživatelská správa - editor</h1>
+
+    <!-- Sekce pro zobrazení uživatelů -->
+    <div id="userList"></div>
+
+    <!-- Formulář pro přidání nebo úpravu uživatele -->
+    <h2 id="formTitle">Přidat uživatele</h2>
+    <form id="userForm">
+      <input type="hidden" id="userId" value="" />
+      <input type="text" id="userName" placeholder="Jméno" required />
+      <input type="number" id="userAge" placeholder="Věk" required />
+      <button type="submit">Uložit</button>
+    </form>
+
+    <script>
+      // Načtení a zobrazení uživatelů
+      function loadUsers() {
+        fetch("/users")
+          .then((response) => response.json())
+          .then((data) => {
+            const userList = document.getElementById("userList");
+            userList.innerHTML =
+              "<ul>" +
+              data
+                .map(
+                  (user) =>
+                    `<li>${user.name}, ${user.age} let <button onclick="editUser(${user.id})">Editovat</button>
+        <button onclick="deleteUser(${user.id})">Smazat</button></li>`
+                )
+                .join("") +
+              "</ul>";
+          });
+      }
+
+      // Přidání nebo úprava uživatele
+      document
+        .getElementById("userForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const userId = document.getElementById("userId").value;
+          const userName = document.getElementById("userName").value;
+          const userAge = document.getElementById("userAge").value;
+          const user = { name: userName, age: parseInt(userAge) };
+
+          const url = userId ? "/users/" + userId : "/users";
+          const method = userId ? "PUT" : "POST";
+
+          fetch(url, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user),
+          }).then(() => {
+            loadUsers();
+            document.getElementById("userForm").reset();
+            document.getElementById("formTitle").textContent =
+              "Přidat uživatele";
+            document.getElementById("userId").value = "";
+          });
+        });
+
+      // Úprava uživatele
+      function editUser(id) {
+        fetch("/users/" + id)
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("userId").value = data.id;
+            document.getElementById("userName").value = data.name;
+            document.getElementById("userAge").value = data.age;
+            document.getElementById("formTitle").textContent =
+              "Editovat uživatele";
+          });
+      }
+
+      // Smazání uživatele
+      function deleteUser(id) {
+        fetch("/users/" + id, { method: "DELETE" }).then(() => {
+          loadUsers();
+        });
+      }
+
+      // Inicializace dat
+      loadUsers();
+    </script>
+  </body>
+</html>
